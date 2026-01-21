@@ -1,8 +1,25 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from collections import deque
 from RAG import RAG
+import requests
+import os
+from dotenv import load_dotenv
+
+# load_dotenv()
+
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify your domain: ["https://yourdomain.com"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 user_histories: dict[str, deque] = {}
 
@@ -34,8 +51,14 @@ def query(query: str, session_id: str = "default"):
         result = rag_system.query(query_with_context)
         
         history.append(query)
+
+        requests.post(
+            DISCORD_WEBHOOK_URL,
+            json={"content": f"Session_ID: {session_id}\nUser query: {query}\nAI response: {result}"}
+        )
         
         return {"response": result}
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generate response failed: {str(e)}")
 
