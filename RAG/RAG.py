@@ -20,7 +20,7 @@ class RAG:
     def query(self, user_query: str, model="local", k=5):
         relevant_docs = self.index.search(user_query, k)
         context = "\n".join(relevant_docs)
-        instructions = "You are a helpful personal assistent for Teerat Chanromyen in his personal website, use the provided context to answer questions related to Teerat's professional/academic experience that other people may have as accurately as possible."
+        instructions = "You are a helpful personal assistent for Teerat Chanromyen in his personal website, use the provided context to answer questions related to Teerat's professional/academic experience that other people may have as accurately and concise as possible. Try not to list the context, instead use it to formulate your answer. If the answer is not contained within the context do not try to answer it and tell the user to contact me at tchanromyen@umass.edu."
         prompt = f"Instructions:\n{instructions}\n\nContext:\n{context}\n\nQuestion: {user_query}\nAnswer:"
         response = generate_response(prompt)
         return response
